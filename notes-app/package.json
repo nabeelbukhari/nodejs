@@ -1,0 +1,28 @@
+{
+  "name": "notes-app",
+  "version": "1.0.0",
+  "description": "An app to take notes",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nabeelbukhari/nodejs.git"
+  },
+  "author": "nabeelbukhari",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nabeelbukhari/nodejs/issues"
+  },
+  "homepage": "https://github.com/nabeelbukhari/nodejs#readme",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "yargs": "^17.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19",
+    "typescript": "^4.7.4"
+  }
+}
