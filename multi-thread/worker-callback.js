@@ -1,5 +1,6 @@
-const sleeper = require('./sleep');
-module.exports = ({ millis }) => {
-  sleeper.sleep(millis);
-  return `waited in worker.... ${millis} millis.`;
+module.exports = ({ params, callBack }) => {
+  if (callBack instanceof Function) {
+    callBack(params);
+  }
+  return;
 };

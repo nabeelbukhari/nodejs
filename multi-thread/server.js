@@ -10,6 +10,9 @@ app.use(cors());
 const piscina = new Piscina({
   filename: path.resolve(__dirname, 'worker.js')
 });
+const workerPool = new Piscina({
+  filename: path.resolve(__dirname, 'worker.js')
+});
 app.get('/message', (req, res) => {
   var theTimeout = req.query.timeout;
   theTimeout = ! theTimeout ? 2000 : theTimeout;
@@ -20,6 +23,12 @@ app.get('/message-worker', async (req, res) => {
   var theTimeout = req.query.timeout;
   theTimeout = ! theTimeout ? 2000 : theTimeout;
   const result = await piscina.run({ millis: theTimeout });
+  res.send ( {result:result });
+});
+app.get('/callback-worker', async (req, res) => {
+  var theTimeout = req.query.timeout;
+  theTimeout = ! theTimeout ? 2000 : theTimeout;
+  const result = await workerPool.run({ params: theTimeout, callBack: sleeper.sleep });
   res.send ( {result:result });
 });
 app.listen(port, () => {
