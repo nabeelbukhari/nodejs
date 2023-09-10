@@ -1,0 +1,84 @@
+const https = require('https');
+const fs = require('fs');
+const { Writable } = require('stream');
+
+const highWaterMarkSize = 128 *1024;
+let data = '';
+
+class CustomWritable extends Writable {
+  constructor(options) {
+    super({ ...options, highWaterMark: highWaterMarkSize }); // Set highWaterMark to 1KB
+  }
+
+  _write(chunk, encoding, callback) {
+    // console.log(`Received ${chunk.length} bytes of data.`);
+    data += chunk;
+    callback();
+  }
+}
+
+const url = 'https://www.reddit.com/r/popular.json'; // Replace with your JSON file URL
+
+let startTime; // Declare the variable to hold the start time
+
+const options = {
+    hostname: 'www.reddit.com', // Change to the actual hostname
+    port: 443,
+    path: '/r/popular.json', // Change to the actual path
+    method: 'GET',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36' // Add your User-Agent string here
+    },
+    highWaterMark: 128*1024
+  };
+  
+
+const customWritable = new CustomWritable();
+const req = https.request(options, (res) => {
+
+//   res.socket.readableHighWaterMark = 32 * 1024;
+//   res.socket.writableHighWaterMark = 32 * 1024;
+  console.log("readableHighWaterMark: ", res.socket.readableHighWaterMark);
+  console.log("writableHighWaterMark: ", res.socket.writableHighWaterMark);
+
+    if (!startTime) {
+        console.log("Reading started!")
+        startTime = Date.now(); // Record the start time on the first data event
+    }
+  res.pipe(customWritable);
+//   res.on('data', (chunk) => {
+
+
+//     data += chunk;
+//     console.log("Reading data with chunk size: ", chunk.length);
+//   });
+
+  res.on('end', () => {
+    const endTime = Date.now(); // Record the end time
+    const elapsedTime = endTime - startTime; // Calculate elapsed time
+    console.log("Reading data ended with total size: ", data.length);
+
+    try {
+      const jsonData = JSON.parse(data);
+      const filePath = './output.json'; // Define the path where you want to save the file
+
+      fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), (err) => {
+        if (err) {
+          console.error(`Error writing file: ${err}`);
+        } else {
+          console.log(`File saved to ${filePath}`);
+          console.log(`Time taken to read body: ${elapsedTime} ms`);
+        }
+      });
+    } catch (error) {
+      console.error(`Error parsing JSON: ${error.message}`);
+      console.error(data);
+    }
+  });
+});
+
+req.on('error', (e) => {
+  console.error(`Error: ${e.message}`);
+});
+
+req.end();
